@@ -29,9 +29,7 @@ class Pokemon(pygame.sprite.Sprite):
         self.rect.x = pos_x
         self.rect.y = pos_y
         self.pulo=100
-    def velocidade(self, velx, vely):
-        self.velocidadex=velx
-        self.velocidadey=vely
+        self.a=1
         
     
             
@@ -43,8 +41,17 @@ class Pokemon(pygame.sprite.Sprite):
                 self.rect.right = block.rect.left
             else:
                 self.rect.left = block.rect.right
-                
-        self.rect.y +=self.velocidadey        
+        print(self.rect.y)
+        print(self.velocidadex)
+        print(y) 
+        self.velocidadey+=self.a
+        self.rect.y +=(self.velocidadey)
+        if self.rect.y>y:
+            self.velocidadey=0
+            self.rect.y=y
+            
+            
+        
         block_hit_list=pygame.sprite.spritecollide(self, Parede, False)
         for block in block_hit_list:
             if self.velocidadey>0:
@@ -68,7 +75,7 @@ parede_TOPO=Parede(0,0,790,10)
 lista_paredes.add(parede_TOPO)
 all_sprite_list.add(parede_TOPO)
 
-parede_BAIXO=Parede(0,590,790,10)
+parede_BAIXO=Parede(0,330,790,10)
 lista_paredes.add(parede_BAIXO)
 all_sprite_list.add(parede_BAIXO)
 
@@ -111,29 +118,21 @@ while runmode:
         if event.type == QUIT:
             # Neste caso, marca o flag rodando como False, 
             # para sair do loop de jogo.
-            rodando = False
-    pressed_keys = pygame.key.get_pressed()
+            runmode = False
+        pressed_keys = pygame.key.get_pressed()
     
-   
-    if event.type == pygame.KEYDOWN:
-        if pressed_keys[K_RIGHT]:
-            player.velocidade(3,0)
-        elif pressed_keys[K_LEFT]:
-            player.velocidade(-3,0)
-        if not pula:
+        if event.type == pygame.KEYDOWN:
             if pressed_keys[K_UP]:
-                pula=True
-
-        else:
-            if contapulo>= -10:
-                neg = 1
-                if contapulo<0:
-                    neg = -1
-                    player.rect.y -= (contapulo** 2) * 0.5* neg
-                    contapulo-=1
-                else:
-                    pula = False
-                    contapulo = 10
+                player.velocidadey=-10
+            if pressed_keys[K_RIGHT]:
+                player.velocidadex=3
+            elif pressed_keys[K_LEFT]:
+                player.velocidadex=-3
+        if event.type == pygame.KEYUP:
+            if pressed_keys[K_RIGHT]:
+                player.velocidadex=0
+            elif pressed_keys[K_LEFT]:
+                player.velocidadex=0
     
     tela.blit(batalha, (0, 0))
 
@@ -142,8 +141,8 @@ while runmode:
     player.update(lista_paredes)
         # Troca de tela na janela principal.
     pygame.display.flip()
-    print(player.rect.x)
-    print(player.rect.y)
+    #print(player.rect.x)
+    #print(player.rect.y)
     
     
     relogio.tick(60)
