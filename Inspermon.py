@@ -5,7 +5,7 @@ Created on Tue May  8 10:05:31 2018
 
 @author: luvi
 """
-
+import Combate as comb
 import pygame
 import sys
 from pygame.locals import *
@@ -148,25 +148,25 @@ while rodando:
             # Neste caso, marca o flag rodando como False, 
             # para sair do loop de jogo.
             rodando = False
-    if event.type == pygame.KEYDOWN:  
-        pressed_keys = pygame.key.get_pressed() 
-        if pressed_keys[K_UP]:
-            player.velocidade(0,-3)
-        elif pressed_keys[K_DOWN]:
-            player.velocidade(0,3)
-        elif pressed_keys[K_RIGHT]:
-            player.velocidade(3,0)
-        elif pressed_keys[K_LEFT]:
-            player.velocidade(-3,0)
-    if event.type == pygame.KEYUP:
-        if pressed_keys[K_UP]:
-         player.velocidade(0,0)
-        elif pressed_keys[K_DOWN]:
-         player.velocidade(0,0)
-        elif pressed_keys[K_RIGHT]:
-            player.velocidade(0,0)
-        elif pressed_keys[K_LEFT]:
-            player.velocidade(0,0)
+        if event.type == pygame.KEYDOWN:  
+            pressed_keys = pygame.key.get_pressed() 
+            if pressed_keys[K_UP]:
+                player.velocidade(0,-3)
+            elif pressed_keys[K_DOWN]:
+                player.velocidade(0,3)
+            elif pressed_keys[K_RIGHT]:
+                player.velocidade(3,0)
+            elif pressed_keys[K_LEFT]:
+                player.velocidade(-3,0)
+        if event.type == pygame.KEYUP:
+            if pressed_keys[K_UP]:
+             player.velocidade(0,0)
+            elif pressed_keys[K_DOWN]:
+             player.velocidade(0,0)
+            elif pressed_keys[K_RIGHT]:
+                player.velocidade(0,0)
+            elif pressed_keys[K_LEFT]:
+                player.velocidade(0,0)
         
                
  
@@ -187,9 +187,7 @@ while rodando:
         pygame.display.flip() 
         tela.blit(sala, (0, 0))
     elif frame==2:
-        print('war')
-        pygame.display.flip() 
-        tela.blit(batalha, (0, 0))
+        frame=comb.combate()
         
        
        

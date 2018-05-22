@@ -8,6 +8,8 @@ import pygame
 import sys
 from pygame.locals import *
 import random
+tiros=pygame.sprite.Group()
+vec = pygame.math.Vector2
 blue = (0,0,255)
 red = (220,20,60)
 green = (0,255,0)
@@ -20,46 +22,107 @@ class Parede(pygame.sprite.Sprite):
         self.rect.y=y
         self.rect.x=x
 class Pokemon(pygame.sprite.Sprite):
-    def __init__(self, imagempokemon, pos_x, pos_y):
+    def __init__(self, imagempokemon, pos_x, pos_y,Parede):
         pygame.sprite.Sprite.__init__(self)
         self.velocidadex=0
         self.velocidadey=0
         self.image = pygame.image.load(imagempokemon)
         self.rect = self.image.get_rect()
-        self.rect.x = pos_x
-        self.rect.y = pos_y
         self.pulo=100
         self.a=1
+        self.pos=vec(pos_x,pos_y)
+        self.rect.x=self.pos.x
+        self.rect.y=self.pos.y
+        self.Parede=Parede
+
         
     
             
-    def update (self, Parede):
-        self.rect.x +=self.velocidadex
-        block_hit_list=pygame.sprite.spritecollide(self, Parede, False)
+    def update (self):
+        self.pos.x +=self.velocidadex
+        block_hit_list=pygame.sprite.spritecollide(self, self.Parede, False)
         for block in block_hit_list:
             if self.velocidadex>0:
                 self.rect.right = block.rect.left
             else:
                 self.rect.left = block.rect.right
-        print(self.rect.y)
-        print(self.velocidadex)
-        print(y) 
         self.velocidadey+=self.a
-        self.rect.y +=(self.velocidadey)
-        if self.rect.y>y:
+        self.pos.y +=(self.velocidadey)
+        if self.pos.y>y:
             self.velocidadey=0
-            self.rect.y=y
+            self.pos.y=y
             
             
         
-        block_hit_list=pygame.sprite.spritecollide(self, Parede, False)
-        for block in block_hit_list:
-            if self.velocidadey>0:
-                self.rect.bottom = block.rect.top
-            else:
-                self.rect.top = block.rect.bottom
+        if self.pos.x>600:
+            self.rect.right = self.rect.left
+        if self.pos.x<0:
+            self.rect.left=self.rect.right
+        self.rect.x=self.pos.x
+        self.rect.y=self.pos.y
+                
+class Tiro(pygame.sprite.Sprite):
+    def __init__(self, Imagemtiro, dano, pos, velocidade):
+        pygame.sprite.Sprite.__init__(self)
+        self.pos=vec(pos)
+        self.velocidade=velocidade
+        self.dano=dano
+        self.image = pygame.image.load(Imagemtiro)
+        self.rect = self.image.get_rect()
+        self.rect=self.pos
+        all_sprite_list.add(self)
+        tiros.add(self)
+            
+    def update (self):
+        self.pos +=self.velocidade
+        self.rect=self.pos
+        
+        #print(self.velocidade)
+        #print(self.pos)
+       
+    def eventos(self):
+        pass
+    
 
-
+class Inimigo(pygame.sprite.Sprite):
+    def __init__(self, imagempokemon, pos_x, pos_y,Parede,vida):
+        pygame.sprite.Sprite.__init__(self)
+        self.velocidadex=0
+        self.velocidadey=0
+        self.image = pygame.image.load(imagempokemon)
+        self.rect = self.image.get_rect()
+        self.pulo=100
+        self.a=1
+        self.pos=vec(pos_x,pos_y)
+        self.rect.x=self.pos.x
+        self.rect.y=self.pos.y
+        self.Parede=Parede
+        self.vida=vida
+    def update (self):
+            self.pos.x +=self.velocidadex
+            block_hit_list=pygame.sprite.spritecollide(self, self.Parede, False)
+            for block in block_hit_list:
+                if self.velocidadex>0:
+                    self.rect.right = block.rect.left
+                else:
+                    self.rect.left = block.rect.right
+            self.velocidadey+=self.a
+            self.pos.y +=(self.velocidadey)
+            if self.pos.y>y:
+                self.velocidadey=0
+                self.pos.y=y
+                
+                
+            
+            block_hit_list=pygame.sprite.spritecollide(self, self.Parede, False)
+            for block in block_hit_list:
+                if self.velocidadey>0:
+                    self.rect.bottom = block.rect.top
+                else:
+                    self.rect.top = block.rect.bottom
+            self.rect.x=self.pos.x
+            self.rect.y=self.pos.y        
+        
 all_sprite_list = pygame.sprite.Group()
 
 lista_paredes=pygame.sprite.Group()
@@ -103,14 +166,20 @@ batalha=pygame.image.load("Arena.jpg").convert()
 #arena= pygame.image.load("Arena.jpg").convert()
 x=100
 y=300
-player = Pokemon("character.png",x,y,)
-
+player = Pokemon("character.png",x,y,lista_paredes)
+Inimigo = Inimigo("character.png",300,y,lista_paredes,100)
 pokemon_group=pygame.sprite.Group()
 pokemon_group.add(player)
 all_sprite_list.add(player)
+inimigos_group=pygame.sprite.Group()
+inimigos_group.add(Inimigo)
+all_sprite_list.add(Inimigo)
+
+
 contapulo=10
 pula=False
 runmode = True
+
 while runmode:
     for event in pygame.event.get():
         
@@ -124,21 +193,34 @@ while runmode:
         if event.type == pygame.KEYDOWN:
             if pressed_keys[K_UP]:
                 player.velocidadey=-10
-            if pressed_keys[K_RIGHT]:
+            elif pressed_keys[K_RIGHT]:
                 player.velocidadex=3
             elif pressed_keys[K_LEFT]:
                 player.velocidadex=-3
+            if pressed_keys[K_SPACE]:
+                if player.velocidadex>0:
+                    b=Tiro('character.png',1,player.pos,vec(4,0))
+                else:
+                    b=Tiro('character.png',1,player.pos,vec(-4,0))
+                
+                
         if event.type == pygame.KEYUP:
             if pressed_keys[K_RIGHT]:
                 player.velocidadex=0
             elif pressed_keys[K_LEFT]:
                 player.velocidadex=0
+#=====================================================
+    print(tiros)
+    print(inimigos_group)
+    #coli=pygame.sprite.spritecollide(tiros, inimigos_group, False)
+    #if coli:
+        #print('ui')
     
     tela.blit(batalha, (0, 0))
 
         # Pinta os elementos do grupo de bolinhas na tela auxiliar.
     all_sprite_list.draw(tela)
-    player.update(lista_paredes)
+    all_sprite_list.update()
         # Troca de tela na janela principal.
     pygame.display.flip()
     #print(player.rect.x)
