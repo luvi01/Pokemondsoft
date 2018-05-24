@@ -12,6 +12,7 @@ from pygame.locals import *
 from pygame.math import Vector2
 
 tiros = pygame.sprite.Group()
+tiros_inimigo = pygame.sprite.Group()
 
 blue = (0,0,255)
 red = (220,20,60)
@@ -27,7 +28,7 @@ class Parede(pygame.sprite.Sprite):
         self.rect.x = x
 
 class Pokemon(pygame.sprite.Sprite):
-    def __init__(self, imagempokemon, pos_x, pos_y, Parede):
+    def __init__(self, imagempokemon, pos_x, pos_y,vida):
         pygame.sprite.Sprite.__init__(self)
         self.velocidadex = 0
         self.velocidadey = 0
@@ -38,29 +39,29 @@ class Pokemon(pygame.sprite.Sprite):
         self.pos = Vector2(pos_x, pos_y)
         self.rect.x = self.pos.x
         self.rect.y = self.pos.y
-        self.Parede = Parede
+        self.vida = vida
             
     def update (self):
         self.pos.x += self.velocidadex
-        block_hit_list = pygame.sprite.spritecollide(self, self.Parede, False)
-        for block in block_hit_list:
+        if self.rect.x>765:
+            self.pos.x = 765
             self.velocidadex = 0
         self.velocidadey += self.a
         self.pos.y += (self.velocidadey)
         if self.pos.y > y:
             self.velocidadey = 0
             self.pos.y = y
-            
-                    
-        if self.pos.x>600:
-            self.rect.right = self.rect.left
-        if self.pos.x<0:
-            self.rect.left=self.rect.right
+        if self.rect.y<2:
+            self.pos.y = 2
+            self.velocidadey = 0
+        if self.rect.x<10:
+            self.pos.x = 10
+            self.velocidadex = 0
         self.rect.x=self.pos.x
         self.rect.y=self.pos.y
                 
 class Tiro(pygame.sprite.Sprite):
-    def __init__(self, Imagemtiro, dano, pos, velocidade):
+    def __init__(self, Imagemtiro, dano, delay, pos, velocidade):
         pygame.sprite.Sprite.__init__(self)
         self.pos = Vector2(pos)
         self.velocidade=velocidade
@@ -69,13 +70,16 @@ class Tiro(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.x = self.pos.x
         self.rect.y = self.pos.y
-        all_sprite_list.add(self)
-        tiros.add(self)
+        self.time = pygame.time.get_ticks()
+        self.last_shot = 0
+        self.shot_delay = delay
             
     def update (self):
-        self.pos += self.velocidade
-        self.rect.x = self.pos.x
-        self.rect.y = self.pos.y
+        if self.time - self.last_shot> self.shot_delay:
+            self.pos += self.velocidade
+            self.rect.x = self.pos.x
+            self.rect.y = self.pos.y
+            self.last_shot = self.time
         
         #print(self.velocidade)
         #print(self.pos)
@@ -85,7 +89,7 @@ class Tiro(pygame.sprite.Sprite):
     
 
 class Inimigo(pygame.sprite.Sprite):
-    def __init__(self, imagempokemon, pos_x, pos_y,Parede,vida):
+    def __init__(self, imagempokemon, pos_x, pos_y,adver,vida):
         pygame.sprite.Sprite.__init__(self)
         self.velocidadex=0
         self.velocidadey=0
@@ -96,34 +100,38 @@ class Inimigo(pygame.sprite.Sprite):
         self.pos=Vector2(pos_x,pos_y)
         self.rect.x=self.pos.x
         self.rect.y=self.pos.y
-        self.Parede=Parede
         self.vida=vida
+        self.adversario=adver
 
     def update (self):
-        self.pos.x +=self.velocidadex
-        block_hit_list=pygame.sprite.spritecollide(self, self.Parede, False)
-        for block in block_hit_list:
-            if self.velocidadex>0:
-                self.rect.right = block.rect.left
+        if self.vida>=0:
+            self.velocidadex = random.randint(-10,10)
+            self.velocidadey = random.randint(-5,3)
+            self.pos.x += self.velocidadex
+            if self.adversario.rect.x>self.rect.x:
+                a=Tiro('character.png',1,2,self.pos,Vector2(4,1))
             else:
-                self.rect.left = block.rect.right
-        self.velocidadey+=self.a
-        self.pos.y +=(self.velocidadey)
-        if self.pos.y>y:
-            self.velocidadey=0
-            self.pos.y=y
+                a=Tiro('character.png',1,2,self.pos,Vector2(-4,0))
+            all_sprite_list.add(a)
+            tiros_inimigo.add(a)
             
-            
-        
-        block_hit_list=pygame.sprite.spritecollide(self, self.Parede, False)
-        for block in block_hit_list:
-            if self.velocidadey>0:
-                self.rect.bottom = block.rect.top
-            else:
-                self.rect.top = block.rect.bottom
-        self.rect.x=self.pos.x
-        self.rect.y=self.pos.y        
-    
+            if self.rect.x>765:
+                self.pos.x = 765
+                self.velocidadex = 0
+            self.velocidadey += self.a
+            self.pos.y += (self.velocidadey)
+            if self.pos.y > y:
+                self.velocidadey = 0
+                self.pos.y = y
+            if self.rect.y<2:
+                self.pos.y = 2
+                self.velocidadey = 0
+            if self.rect.x<10:
+                self.pos.x = 10
+                self.velocidadex = 0
+            self.rect.x=self.pos.x
+            self.rect.y=self.pos.y
+       
 all_sprite_list = pygame.sprite.Group()
 
 lista_paredes = pygame.sprite.Group()
@@ -158,16 +166,16 @@ batalha = pygame.image.load("Arena.jpg").convert()
 x = 100
 y = 300
 
-player = Pokemon("character.png",x,y,lista_paredes)
-Inimigo = Inimigo("character.png",300,y,lista_paredes,100)
+player = Pokemon("character.png",x,y,100)
+pokemomwild = Inimigo("character.png",300,y,player,100)
 
 pokemon_group=pygame.sprite.Group()
 pokemon_group.add(player)
 all_sprite_list.add(player)
 
 inimigos_group=pygame.sprite.Group()
-inimigos_group.add(Inimigo)
-all_sprite_list.add(Inimigo)
+inimigos_group.add(pokemomwild)
+all_sprite_list.add(pokemomwild)
 
 
 contapulo=10
@@ -192,9 +200,14 @@ while runmode:
                 player.velocidadex=-3
             if event.key == K_SPACE:
                 if player.velocidadex>0:
-                    b=Tiro('character.png',1,player.pos,Vector2(4,0))
+                    b=Tiro('character.png',1,2,player.pos,Vector2(4,0))
+                    all_sprite_list.add(b)
+                    tiros.add(b)
                 else:
-                    b=Tiro('character.png',1,player.pos,Vector2(-4,0))
+                    b=Tiro('character.png',1,2,player.pos,Vector2(-4,0))
+                    all_sprite_list.add(b)
+                    tiros.add(b)
+           
                 
                 
         if event.type == pygame.KEYUP:
@@ -203,17 +216,26 @@ while runmode:
             elif event.key == K_LEFT:
                 player.velocidadex=0
 #=====================================================
+   
+#=====================================================
     coli=pygame.sprite.groupcollide(inimigos_group, tiros, False, True)
     for inimigo, tiros_nele in coli.items():
         if tiros_nele:
             print('Inimigo {0} levou {1} tiros'.format(inimigo, len(tiros_nele)))
+            pokemomwild.vida-=b.dano
+        
+    #print(pokemomwild.vida)
+    print(pygame.time.get_ticks())
+#=====================================================
     
     tela.blit(batalha, (0, 0))
 
         # Pinta os elementos do grupo de bolinhas na tela auxiliar.
     all_sprite_list.draw(tela)
     all_sprite_list.update()
-        # Troca de tela na janela principal.
+    if pokemomwild.vida<0:
+        inimigos_group.remove(pokemomwild)
+        all_sprite_list.remove(pokemomwild)
     pygame.display.flip()
     #print(player.rect.x)
     #print(player.rect.y)
