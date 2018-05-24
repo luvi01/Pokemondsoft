@@ -122,6 +122,7 @@ victor = pygame.image.load('Slide5.jpg')
 pelican = pygame.image.load('Slide6.jpg')
 daniel = pygame.image.load('Slide7.jpg')
 musica_selecao = Sound ('Vingadores.ogg')
+frame6 = pygame.image.load ('Slide8.jpg')
 #========================================
 
 #=======================================
@@ -203,8 +204,9 @@ while rodando:
         musica_selecao.stop()
         numero = 0
         lista_paredes=pygame.sprite.Group()
-        
         lista_casa=pygame.sprite.Group()
+        
+
         casa=Entrada(410,410,40,10)
         lista_casa.add(casa)
         all_sprite_list.add(casa)
@@ -231,11 +233,14 @@ while rodando:
         if 410<=player.rect.y<=420 and 415<=player.rect.x<=425:
             frame = 10
         if player.rect.y < 0:
-            player.rect.y = 420
+            player.rect.y = 680
             frame = 3
         if player.rect.x < 0:
             player.rect.x = 880
             frame = 4
+        if player.rect.x>900:
+            player.rect.x = 0
+            frame = 8
             
         
 
@@ -260,12 +265,20 @@ while rodando:
         parede_TOPO=Parede(0,0,900,10)
         lista_paredes.add(parede_TOPO)
         all_sprite_list.add(parede_TOPO)
+        lista_paredes.remove(parede_mercado)
+        lista_paredes.remove(parede_insper)
+        lista_paredes.remove(parede_BAIXO)
+
         numero = 3
-        all_sprite_list.draw(tela)
+        character_group.draw(tela)
         frame=player.update(lista_paredes,lista_casa,lista_grama,3)
         pygame.display.flip()
-        if player.rect.x>900:
+        if player.rect.x>874:
+            player.rect.x = 0
             frame =5
+        if player.rect.y>700:
+            player.rect.y = 0
+            frame = 0
         
         
     if frame == 4:
@@ -297,7 +310,26 @@ while rodando:
         numero = 5
         character_group.draw(tela)
         frame=player.update(lista_paredes,lista_casa,lista_grama,5)
+        if player.rect.x<0:
+            player.rect.x = 870
+            frame = 3
+            lista_paredes.remove(parede_ladoD)
         pygame.display.flip ()
+        
+    if frame == 8:
+        tela.blit (frame6, (0,0))
+        character_group.draw(tela)
+        numero = 8
+        
+        frame=player.update(lista_paredes,lista_casa,lista_grama,8)
+        pygame.display.flip()
+        if player.rect.y < 0:
+            player.rect.y = 680
+            frame = 5
+        if player.rect.x<0:
+            player.rect.x = 880
+            frame = 0
+        
        
     if frame == 7:
         tela.blit(historia, (0,0))
@@ -338,6 +370,8 @@ while rodando:
         for event in pygame.event.get():
             if event.type == pygame.KEYDOWN:
                 if event.key== K_a: 
+                    player.rect.x = 410
+                    player.rect.y = 411
                     frame = 0
         pygame.display.flip()
     if frame == 12:
@@ -345,6 +379,8 @@ while rodando:
         for event in pygame.event.get():
             if event.type == pygame.KEYDOWN:
                 if event.key== K_a: 
+                    player.rect.x = 410
+                    player.rect.y = 411
                     frame = 0
         pygame.display.flip()           
     if frame == 13:
@@ -352,6 +388,8 @@ while rodando:
         for event in pygame.event.get():
             if event.type == pygame.KEYDOWN:
                 if event.key== K_a: 
+                    player.rect.x = 410
+                    player.rect.y = 411
                     frame = 0    
         pygame.display.flip()
     if frame == 14:
@@ -359,6 +397,8 @@ while rodando:
         for event in pygame.event.get():
             if event.type == pygame.KEYDOWN:
                 if event.key== K_a: 
+                    player.rect.x = 410
+                    player.rect.y = 411
                     frame = 0 
         pygame.display.flip()
     
@@ -367,6 +407,8 @@ while rodando:
         for event in pygame.event.get():
             if event.type == pygame.KEYDOWN:
                 if event.key== K_a: 
+                    player.rect.x = 410
+                    player.rect.y = 411
                     frame = 0
         pygame.display.flip()
                     
@@ -375,6 +417,8 @@ while rodando:
         for event in pygame.event.get():
             if event.type == pygame.KEYDOWN:
                 if event.key== K_a: 
+                    player.rect.x = 410
+                    player.rect.y = 411
                     frame = 0   
         pygame.display.flip()
         
