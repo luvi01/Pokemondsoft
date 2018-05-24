@@ -70,16 +70,16 @@ class Tiro(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.x = self.pos.x
         self.rect.y = self.pos.y
-        self.time = pygame.time.get_ticks()
-        self.last_shot = 0
-        self.shot_delay = delay
+        #self.time = pygame.time.get_ticks()
+        #self.last_shot = 0
+        #self.shot_delay = delay
             
     def update (self):
-        if self.time - self.last_shot> self.shot_delay:
+        #if self.time - self.last_shot> self.shot_delay:
             self.pos += self.velocidade
             self.rect.x = self.pos.x
             self.rect.y = self.pos.y
-            self.last_shot = self.time
+            #self.last_shot = self.time
         
         #print(self.velocidade)
         #print(self.pos)
