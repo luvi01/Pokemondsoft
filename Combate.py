@@ -42,24 +42,28 @@ class Pokemon(pygame.sprite.Sprite):
         self.vida = vida
             
     def update (self):
-        self.pos.x += self.velocidadex
-        if self.rect.x>765:
-            self.pos.x = 765
-            self.velocidadex = 0
-        self.velocidadey += self.a
-        self.pos.y += (self.velocidadey)
-        if self.pos.y > y:
-            self.velocidadey = 0
-            self.pos.y = y
-        if self.rect.y<2:
-            self.pos.y = 2
-            self.velocidadey = 0
-        if self.rect.x<10:
-            self.pos.x = 10
-            self.velocidadex = 0
-        self.rect.x=self.pos.x
-        self.rect.y=self.pos.y
-                
+        if self.vida>0:
+            self.pos.x += self.velocidadex
+            if self.rect.x>765:
+                self.pos.x = 765
+                self.velocidadex = 0
+            self.velocidadey += self.a
+            self.pos.y += (self.velocidadey)
+            if self.pos.y > y:
+                self.velocidadey = 0
+                self.pos.y = y
+            if self.rect.y<2:
+                self.pos.y = 2
+                self.velocidadey = 0
+            if self.rect.x<10:
+                self.pos.x = 10
+                self.velocidadex = 0
+            
+            self.rect.x=self.pos.x
+            self.rect.y=self.pos.y
+        else:
+            pokemon_group.remove(self)
+            all_sprite_list.remove(self)
 class Tiro(pygame.sprite.Sprite):
     def __init__(self, Imagemtiro, dano, delay, pos, velocidade):
         pygame.sprite.Sprite.__init__(self)
@@ -108,12 +112,6 @@ class Inimigo(pygame.sprite.Sprite):
             self.velocidadex = random.randint(-10,10)
             self.velocidadey = random.randint(-5,3)
             self.pos.x += self.velocidadex
-            if self.adversario.rect.x>self.rect.x:
-                a=Tiro('character.png',1,2,self.pos,Vector2(4,1))
-            else:
-                a=Tiro('character.png',1,2,self.pos,Vector2(-4,0))
-            all_sprite_list.add(a)
-            tiros_inimigo.add(a)
             
             if self.rect.x>765:
                 self.pos.x = 765
@@ -182,15 +180,19 @@ contapulo=10
 pula=False
 runmode = True
 
-while runmode:
+def batalha(num):
     for event in pygame.event.get():
+        if player.vida<=0:
+            return  num
+            
         
         # Verifica se o evento atual é QUIT (janela fechou).
         if event.type == QUIT:
             # Neste caso, marca o flag rodando como False, 
             # para sair do loop de jogo.
-            runmode = False
-    
+            return  num
+        print(player.vida)
+                
         if event.type == pygame.KEYDOWN:
             if event.key == K_UP:
                 player.velocidadey=-10
@@ -199,33 +201,51 @@ while runmode:
             elif event.key == K_LEFT:
                 player.velocidadex=-3
             if event.key == K_SPACE:
-                if player.velocidadex>0:
-                    b=Tiro('character.png',1,2,player.pos,Vector2(4,0))
-                    all_sprite_list.add(b)
-                    tiros.add(b)
-                else:
-                    b=Tiro('character.png',1,2,player.pos,Vector2(-4,0))
-                    all_sprite_list.add(b)
-                    tiros.add(b)
-           
-                
-                
+                    if player.velocidadex>0:
+                        b=Tiro('character.png',1,2,player.pos,Vector2(4,0))
+                        all_sprite_list.add(b)
+                        tiros.add(b)
+                    else:
+                        b=Tiro('character.png',1,2,player.pos,Vector2(-4,0))
+                        all_sprite_list.add(b)
+                        tiros.add(b)
+                   
+                        
+                        
         if event.type == pygame.KEYUP:
-            if event.key == K_RIGHT:
-                player.velocidadex=0
-            elif event.key == K_LEFT:
-                player.velocidadex=0
+                if event.key == K_RIGHT:
+                    player.velocidadex=0
+                elif event.key == K_LEFT:
+                    player.velocidadex=0
 #=====================================================
-   
+    if pokemomwild.vida>0:
+        
+        if player.rect.x>pokemomwild.rect.x:
+            a=Tiro('character.png',1,2,pokemomwild.pos,Vector2(4,0))
+        else:
+            a=Tiro('character.png',1,2,pokemomwild.pos,Vector2(-4,0))
+        tiros_inimigo.add(a)    
+        all_sprite_list.add(a)
+    else:
+        inimigos_group.remove(pokemomwild)
+        all_sprite_list.remove(pokemomwild)
+        tiros_inimigo.remove(a)    
+        all_sprite_list.remove(a)
 #=====================================================
     coli=pygame.sprite.groupcollide(inimigos_group, tiros, False, True)
     for inimigo, tiros_nele in coli.items():
         if tiros_nele:
             print('Inimigo {0} levou {1} tiros'.format(inimigo, len(tiros_nele)))
-            pokemomwild.vida-=b.dano
-        
-    #print(pokemomwild.vida)
-    print(pygame.time.get_ticks())
+            pokemomwild.vida-=20
+            
+            
+    colisao=pygame.sprite.groupcollide(pokemon_group, tiros_inimigo, False, True)
+    for inimigo, tiros_nele in colisao.items():
+        if tiros_nele:
+            print('Inimigo {0} levou {1} tiros'.format(inimigo, len(tiros_nele)))
+            #player.vida-=a.dano
+    print(pokemomwild.vida)
+    #print(pygame.time.get_ticks())
 #=====================================================
     
     tela.blit(batalha, (0, 0))
