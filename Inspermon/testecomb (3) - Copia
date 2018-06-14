@@ -1,0 +1,202 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Sat Jun  2 12:09:48 2018
+
+@author: luvi
+"""
+
+import pygame
+import sys
+from pygame.locals import *
+import random
+green = (0,255,0)
+yellow = (255,255,0)
+red = (255,0,0)
+black = (0,0,0)
+class Pokemon(pygame.sprite.Sprite):
+    def __init__(self, imagemplayer,imagemplayer_escudo,imagemplayer_carregar,imagemplayer_tiro, vida, escudo, tiro, xp, nivel):
+        pygame.sprite.Sprite.__init__(self)
+        self.shield = False
+        self.tiro = False
+        self.carregar = False
+        self.ammo = 0
+        if self.shield == True:
+            self.image = pygame.image.load(imagemplayer_escudo)
+        if self.carregar == True:
+            self.image = pygame.image.load(imagemplayer_carregar)
+        if self.tiro == True:
+            self.image = pygame.image.load(imagemplayer_tiro)
+        else:
+            self.image = pygame.image.load(imagemplayer)
+        self.rect = self.image.get_rect()
+        self.nivel = nivel
+        self.vida = vida*self.nivel
+        self.escudo = escudo*self.nivel
+        self.tiro_dano = tiro*self.nivel
+        self.xp = xp
+#==================================================
+        if self.xp >= 100:
+            self.nive +=1
+            self.xp = 0
+            
+        
+luvi = Pokemon("luvi.png","character.png","character.png","character.png", 100, 20, 20,0,1)
+rods = Pokemon("character.png","character.png","character.png","character.png", 100, 20, 20,0,1)
+
+pygame.init()
+tela = pygame.display.set_mode((800, 600), 0, 32)
+pygame.display.set_caption('Inspermon')
+relogio= pygame.time.Clock()
+
+Fundo = pygame.image.load("Fundo.jpg").convert()
+
+player = luvi
+computador = rods
+
+sprite_pokemon = pygame.sprite.Group()
+sprite_pokemon.add(player)
+sprite_pokemon.add(computador)
+
+smallfont = pygame.font.SysFont("comicsansms", 25)
+
+def health_bars(player_health, enemy_health):
+    
+    if player_health > 75:
+        player_health_color = green
+    elif player_health > 50:
+        player_health_color = yellow
+    else:
+        player_health_color = red
+    
+    if enemy_health > 75:
+        enemy_health_color = green
+    elif enemy_health > 50:
+        enemy_health_color = yellow
+    else:
+        enemy_health_color = red
+    
+    pygame.draw.rect(tela, player_health_color, (680,25,player_health,25))
+    pygame.draw.rect(tela, enemy_health_color, (20,25,enemy_health,25))
+    
+def texto (oi, x, y, cor):
+    text = smallfont.render(oi,True, cor)
+    tela.blit(text, [x,y])
+def menu(ammo, x, y):
+    text = smallfont.render("Munição: "+str(ammo), True, black)
+    tela.blit(text, [x,y])
+def turn(ammo, x, y):
+    text = smallfont.render("Turno: "+str(ammo), True, black)
+    tela.blit(text, [x,y])
+
+def confronto(numero):
+    action = True
+    rodando = True
+    turno = 0    
+    while rodando:
+        player.rect.x = 100
+        player.rect.y = 400
+        computador.rect.x = 500
+        computador.rect.y = 400
+        
+        health_bars(player.vida, computador.vida)
+    #=========================================================================================
+       
+        #print('shield:',player.shield)
+        #print('carregar:',player.carregar)
+        print('turno:',turno)
+        #print('action:',action)
+        print('vidacomp:',computador.vida)
+        print('vidaplayer:',player.vida)
+        print('ammoplayer:',player.ammo)
+        print('ammocomp:',computador.ammo)
+        if player.vida <= 0 or computador.vida <= 0:
+            return numero
+            rodando = False
+            
+        for event in pygame.event.get():
+            player.tiro = False
+            player.shield = False
+            player.carregar = False
+            
+            if event.type == QUIT:
+                rodando = False
+            
+            if event.type == pygame.KEYDOWN:
+                if event.key == K_DOWN:
+                    player.shield = True
+                    turno += 1
+                    action = True
+                elif event.key == K_UP:
+                    player.carregar = True
+                    turno += 1
+                    action = True
+                elif event.key == K_RIGHT:
+                    player.tiro = True
+                    turno += 1
+                    action = True
+    #==========================AI===============================================================
+            if turno == 0:
+                 computador.shield = True
+                 computador.tiro = False
+                 computador.carregar = False
+            else:
+                if random.randint(0,100)<10:
+                    computador.shield = True
+                else:
+                    computador.shield = False
+                if random.randint(0,100)<50:
+                    computador.tiro = True
+                else:
+                    computador.tiro = False
+                if random.randint(0,100)<30:
+                    computador.carregar = True
+                else:
+                    computador.carregar = False
+                    
+                if computador.carregar == False and computador.tiro == False and computador.carregar == False:
+                    computador.shield = True
+    #========================CHECK=================================================================
+        else:
+            if action:
+                if player.tiro:
+                    if player.ammo > 0:       
+                        if computador.shield:
+                            y = computador.escudo
+                            computador.vida-=(player.tiro_dano)-y
+                            player.ammo -=1
+                        else:
+                            computador.vida-=(player.tiro_dano)
+                            player.ammo -=1
+                    else:
+                        print('No Amooo')
+                            
+                if player.carregar == True:
+                    player.ammo+=1
+                
+                if computador.tiro == True:
+                        if computador.ammo > 0:
+                            if player.shield == True:
+                                y = player.escudo
+                                player.vida-=(computador.tiro_dano)-y
+                                computador.ammo-=1
+                            else:
+                                player.vida-=(computador.tiro_dano)
+                                computador.ammo-=1
+                        else:
+                            print()
+                if computador.carregar == True:
+                    computador.ammo+=1
+                action = False
+    
+        relogio.tick(60)
+    #=========================ANIMAÇÃO=======================================================================================
+        tela.blit(Fundo, (0,0))
+        sprite_pokemon.draw(tela)
+        health_bars(computador.vida, player.vida)
+        menu(player.ammo, 20, 50)
+        menu(computador.ammo,670,50)
+        turn(turno, 350, 10)
+        pygame.display.update()
+        pygame.display.flip()
+    pygame.display.quit()
